@@ -1,8 +1,9 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
-TOKEN = "your_bot_token_here"  # Replace with real token
-ADMIN_USERNAME = "your_admin_username"  # Replace with your username (without @)
+# === CONFIG (Hardcoded) ===
+TOKEN = "8048006751:AAHguvRY8bxMq0w8wYwhMc4u7MV3SLXbVMc"  # Your actual bot token
+ADMIN_USERNAME = "shirishgoyal30"  # Your Telegram username (without @)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
