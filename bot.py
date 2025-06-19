@@ -10,13 +10,13 @@ from telegram.ext import (
 TOKEN = "8048006751:AAHguvRY8bxMq0w8wYwhMc4u7MV3SLXbVMc"  # Your actual bot token
 ADMIN_USERNAME = "shirishgoyal30"  # Your Telegram username (without @)
 
-# === LOGGER ===
+# === LOGGING ===
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 
-# === WHITELIST SET ===
+# === IN-MEMORY WHITELIST ===
 whitelisted_users = set()
 
 # === /start COMMAND ===
@@ -28,20 +28,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             f"👋 Hello {name} (Admin)!\n\n"
             "Welcome to the VCF FN Extractor Bot.\n\n"
-            "🛠 Available Admin Commands:\n"
-            "➕ /adduser <username> – Add a user\n"
-            "➖ /removeuser <username> – Remove a user\n"
-            "📋 /listusers – View whitelisted users\n\n"
-            "📤 You can also send `.vcf` files to extract FN fields."
+            "🛠 Admin Commands:\n"
+            "➕ /adduser <username>\n"
+            "➖ /removeuser <username>\n"
+            "📋 /listusers\n"
+            "📤 Send `.vcf` files to extract FN fields."
         )
-
     elif user.username in whitelisted_users:
         await update.message.reply_text(
             f"👋 Hello {name}!\n\n"
             "✅ You are whitelisted.\n"
-            "📤 Please send or forward a `.vcf` file to extract FN fields."
+            "📤 Send or forward a `.vcf` file to extract FN fields."
         )
-
     else:
         await update.message.reply_text(
             f"👋 Hello {name}!\n\n"
@@ -61,13 +59,14 @@ async def add_user_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     username = context.args[0].replace("@", "")
-    buttons = [
+    keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("✅ Confirm", callback_data=f"add:{username}")],
         [InlineKeyboardButton("❌ Cancel", callback_data="cancel")]
-    ]
+    ])
+
     await update.message.reply_text(
         f"Do you want to add @{username} to the whitelist?",
-        reply_markup=InlineKeyboardMarkup(buttons)
+        reply_markup=keyboard
     )
 
 
@@ -82,13 +81,14 @@ async def remove_user_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
 
     username = context.args[0].replace("@", "")
-    buttons = [
+    keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("✅ Confirm", callback_data=f"remove:{username}")],
         [InlineKeyboardButton("❌ Cancel", callback_data="cancel")]
-    ]
+    ])
+
     await update.message.reply_text(
         f"Do you want to remove @{username} from the whitelist?",
-        reply_markup=InlineKeyboardMarkup(buttons)
+        reply_markup=keyboard
     )
 
 
@@ -105,17 +105,18 @@ async def list_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("ℹ️ No users are currently whitelisted.")
 
 
-# === CALLBACK BUTTON HANDLER ===
+# === INLINE BUTTON HANDLER ===
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    user = query.from_user.username
     await query.answer()
+
+    user = query.from_user.username
+    data = query.data
 
     if user != ADMIN_USERNAME:
         await query.edit_message_text("🚫 Only the admin can use these buttons.")
         return
 
-    data = query.data
     if data.startswith("add:"):
         username = data.split(":", 1)[1]
         whitelisted_users.add(username)
@@ -155,15 +156,15 @@ async def handle_vcf(update: Update, context: ContextTypes.DEFAULT_TYPE):
         fn_list = [line.strip()[3:] for line in lines if line.startswith("FN:")]
 
         if fn_list:
-            await update.message.reply_text(f"✅ FN Fields Found:\n" + "\n".join(fn_list))
+            await update.message.reply_text(f"✅ FN Fields:\n" + "\n".join(fn_list))
         else:
-            await update.message.reply_text("⚠️ No `FN:` fields found in the VCF file.")
+            await update.message.reply_text("⚠️ No `FN:` fields found in this VCF file.")
 
     except Exception as e:
         await update.message.reply_text(f"❌ Error processing file:\n{e}")
 
 
-# === MAIN FUNCTION ===
+# === MAIN ===
 def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
