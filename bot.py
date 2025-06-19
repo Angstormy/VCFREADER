@@ -6,10 +6,9 @@ from telegram.ext import (
     ContextTypes, filters
 )
 
-# === CONFIG ===
-import os
-TOKEN = os.getenv("BOT_TOKEN")  # Railway will inject this via environment variable
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")  # Also inject your Telegram username
+# === CONFIG (Hardcoded) ===
+TOKEN = "8048006751:AAHguvRY8bxMq0w8wYwhMc4u7MV3SLXbVMc"  # Your actual bot token
+ADMIN_USERNAME = "shirishgoyal30"  # Your Telegram username (without @)
 
 # === LOGGER ===
 logging.basicConfig(
